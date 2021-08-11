@@ -1,0 +1,4 @@
+tweepy==3.10.0
+python-dotenv==0.19.0
+loguru==0.5.3
+pytest-mock==3.6.1
