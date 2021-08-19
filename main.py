@@ -19,35 +19,33 @@ def tweet(message: str):
 
 
 def get_todays_gazette():
-    official_diary= []
+    gazettes = []
 
     date_today = datetime.date.today().strftime('%Y-%m-%d')
 
+    params = {'start_date': date_today}
     url = os.getenv('MARIA_QUITERIA_API_URL')
     headers = {
         'Content-Type': 'application/json',
         'Authorization': os.getenv('MARIA_QUITERIA_API_TOKEN')
     }
     
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=params)
     response_json = response.json()
-    
-    for resp in response_json['results']:
-        import pdb;pdb.set_trace()
-        if resp['date'] == date_today:
-            print(resp['date'])
-            official_diary.append(resp)
 
-    return official_diary
+    for result in response_json['results']:
+        gazettes.append(result)
+
+    return gazettes
 
 
-def post_todays_gazette(official_diary: list):
+def post_todays_gazette(gazettes: list):
     date_today = datetime.date.today().strftime('%Y-%m-%d')
-    for diary in official_diary:
-        tweet_message = f"Saiu uma nova edição do #DiárioOficial do poder {diary['power']} de #FeiradeSantana ({date_today} - {diary['year_and_edition']}).\n{diary['files'][0]['url']}"
+    for gazette in gazettes:
+        tweet_message = f"Saiu uma nova edição do #DiárioOficial do poder {gazette['power']} de #FeiradeSantana ({date_today} - {gazette['year_and_edition']}).\n{gazette['files'][0]['url']}"
         tweet(tweet_message)
 
 
 if __name__ == '__main__':
-    official_diary = get_todays_gazette()
-    post_todays_gazette(official_diary)
+    gazettes = get_todays_gazette()
+    post_todays_gazette(gazettes)
