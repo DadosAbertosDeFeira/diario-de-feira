@@ -18,32 +18,36 @@ def tweet(message: str):
     api.update_status(message)
 
 
-def get_todays_official_diary():
+def get_todays_gazette():
     official_diary= []
 
-    url = os.getenv('URL_API_MARIA_QUITERIA')
+    date_today = datetime.date.today().strftime('%Y-%m-%d')
+
+    url = os.getenv('MARIA_QUITERIA_API_URL')
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': os.getenv('TOKEN')
+        'Authorization': os.getenv('MARIA_QUITERIA_API_TOKEN')
     }
     
     response = requests.get(url, headers=headers)
     response_json = response.json()
     
-    date_today = datetime.date.today()
     for resp in response_json['results']:
-        if resp['date'] == '2021-08-14': #date_today:
+        import pdb;pdb.set_trace()
+        if resp['date'] == date_today:
+            print(resp['date'])
             official_diary.append(resp)
 
     return official_diary
 
 
-def post_todays_official_diary(official_diary: list):
+def post_todays_gazette(official_diary: list):
+    date_today = datetime.date.today().strftime('%Y-%m-%d')
     for diary in official_diary:
-        tweet_message = f"Saiu uma nova edição do #DiárioOficial do poder {diary['power']} de #FeiradeSantana ({'2021-08-14'} - {diary['year_and_edition']}).\n{diary['files'][0]['url']}"
+        tweet_message = f"Saiu uma nova edição do #DiárioOficial do poder {diary['power']} de #FeiradeSantana ({date_today} - {diary['year_and_edition']}).\n{diary['files'][0]['url']}"
         tweet(tweet_message)
 
 
 if __name__ == '__main__':
-    official_diary = get_todays_official_diary()
-    post_todays_official_diary(official_diary)
+    official_diary = get_todays_gazette()
+    post_todays_gazette(official_diary)

@@ -2,7 +2,7 @@ from unittest import mock
 import pytest
 import requests
 import json
-from main import tweet, get_todays_official_diary
+from main import tweet, get_todays_gazette
 from unittest.mock import call
 
 
@@ -15,7 +15,7 @@ def test_if_tweet_was_post_on_twitter(mocker):
     assert call().update_status('Hi') in mock_tweepy.API.mock_calls
 
 
-def test_if_get_todays_official_diary_return_result(mocker):
+def test_if_get_todays_gazette_return_result(mocker):
     expected_result = {
         "count": 249,
         "next": "...",
@@ -45,6 +45,7 @@ def test_if_get_todays_official_diary_return_result(mocker):
     mock_response.return_value.ok = True
     mock_response.return_value.json.return_value = expected_result
     
-    result = get_todays_official_diary()
+    result = get_todays_gazette()
 
+    assert mock_response.called
     assert result != []
