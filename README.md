@@ -3,6 +3,8 @@
 Um bot para informar a população sobre o que
 acontece no Diário Oficial.
 
+[![CI](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/cicd.yml/badge.svg)](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/cicd.yml)
+
 ## Visão
 
 A ideia desse projeto é criar um serviço genérico
