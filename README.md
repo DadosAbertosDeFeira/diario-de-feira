@@ -2,7 +2,7 @@
 
 Um bot para informar a população sobre o que acontece no Diário Oficial. 📰
 
-[![CI](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/cicd.yml/badge.svg)](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/cicd.yml)
+[![CI](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/cicd.yml/badge.svg)](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/cicd.yml) [![Agendamento de postagens de tweets](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/schedule.yml/badge.svg)](https://github.com/DadosAbertosDeFeira/diario-de-feira/actions/workflows/schedule.yml)
 
 ## Visão
 
