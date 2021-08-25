@@ -4,6 +4,7 @@ import os
 import requests
 import tweepy
 from dotenv import load_dotenv
+from loguru import logger
 
 load_dotenv()
 
@@ -14,6 +15,25 @@ def tweet(message: str):
 
     api = tweepy.API(auth)
     api.update_status(message)
+    logger.info("The gazette was posted on twitter!")
+
+
+def refresh_maria_quiteria_api_token():
+    headers = {
+        "content_Type": "application/json"
+    }
+    url = os.getenv("MARIA_QUITERIA_API_URL_TOKEN")
+    data = {
+        "username":f"{os.getenv('USERNAME_CREDENCIALS')}",
+        "password": f"{os.getenv('PASSWORD_CREDENCIALS')}"
+    }
+
+    refresh_token_response = requests.post(url, headers=headers, data=data)
+    if refresh_token_response.status_code == 200:
+        logger.info('New token created')
+        new_token = f"Bearer {refresh_token_response.json()['access']}"    
+
+    return new_token
 
 
 def get_todays_gazette():
@@ -27,13 +47,32 @@ def get_todays_gazette():
         "Content-Type": "application/json",
         "Authorization": os.getenv("MARIA_QUITERIA_API_TOKEN"),
     }
+    success = False
+    number_of_attempts = 0
+    while success == False and number_of_attempts < 4:
+        try:
+            logger.info("Looking for gazettes")
+            response = requests.get(url, headers=headers, params=params)
 
-    response = requests.get(url, headers=headers, params=params)
-    response_json = response.json()
-
-    for result in response_json["results"]:
-        gazettes.append(result)
-
+            response_json = response.json()
+            for result in response_json["results"]:
+                gazettes.append(result)
+            success = True
+        except KeyError as e:
+            logger.exception(e)
+            if (response.status_code in [401, 403]) and response.json()['code'] == "token_not_valid":
+                logger.info("Token is invalid or expired. Getting new token")
+                new_token = refresh_maria_quiteria_api_token()
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": new_token,
+                }
+            number_of_attempts += 1
+            logger.info(f"Trying to get gazettes again. Attempt {number_of_attempts}/3.")
+            continue
+    
+    if gazettes == []:
+        logger.debug("Failed to fetch gazettes")
     return gazettes
 
 
