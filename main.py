@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 load_dotenv()
+ATTEMPTS_TO_POST_GAZETTES = 3
 
 
 def tweet(message: str):
@@ -22,7 +23,7 @@ def refresh_maria_quiteria_api_token():
     headers = {
         "content_Type": "application/json"
     }
-    url = os.getenv("MARIA_QUITERIA_API_URL_TOKEN")
+    url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
     data = {
         "username":f"{os.getenv('USERNAME_CREDENCIALS')}",
         "password": f"{os.getenv('PASSWORD_CREDENCIALS')}"
@@ -42,37 +43,32 @@ def get_todays_gazette():
     date_today = datetime.date.today().strftime("%Y-%m-%d")
 
     params = {"start_date": date_today}
-    url = os.getenv("MARIA_QUITERIA_API_URL")
+    url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
     headers = {
         "Content-Type": "application/json",
         "Authorization": os.getenv("MARIA_QUITERIA_API_TOKEN"),
     }
     success = False
     number_of_attempts = 0
-    while success == False and number_of_attempts < 4:
+    while success is False and number_of_attempts < ATTEMPTS_TO_POST_GAZETTES:
         try:
             logger.info("Looking for gazettes")
             response = requests.get(url, headers=headers, params=params)
-
             response_json = response.json()
-            for result in response_json["results"]:
-                gazettes.append(result)
+
+            gazettes = [result for result in response_json["results"]]
             success = True
         except KeyError as e:
             logger.exception(e)
-            if (response.status_code in [401, 403]) and response.json()['code'] == "token_not_valid":
+            if response.status_code in [401, 403] and response_json['code'] == "token_not_valid":
                 logger.info("Token is invalid or expired. Getting new token")
                 new_token = refresh_maria_quiteria_api_token()
-                headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": new_token,
-                }
+                headers["Authorization"] = new_token
             number_of_attempts += 1
-            logger.info(f"Trying to get gazettes again. Attempt {number_of_attempts}/3.")
+            logger.info(f"Trying to get gazettes again. Attempt {number_of_attempts}/{ATTEMPTS_TO_POST_GAZETTES}.")
             continue
     
-    if gazettes == []:
-        logger.debug("Failed to fetch gazettes")
+    logger.info(f"Number of gazettes found: {len(gazettes)}")
     return gazettes
 
 
