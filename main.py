@@ -66,8 +66,10 @@ def get_todays_gazette():
                 headers["Authorization"] = new_token
             number_of_attempts += 1
             logger.info(f"Trying to get gazettes again. Attempt {number_of_attempts}/{ATTEMPTS_TO_POST_GAZETTES}.")
+            if number_of_attempts == 3:
+                raise KeyError
             continue
-    
+
     logger.info(f"Number of gazettes found: {len(gazettes)}")
     return gazettes
 
