@@ -22,23 +22,20 @@ def tweet(message: str):
 
 
 def create_maria_quiteria_api_token():
-    headers = {
-        "content_Type": "application/json"
-    }
+    headers = {"content_Type": "application/json"}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
     data = {
-        "username":f"{os.getenv('MARIA_QUITERIA_USERNAME_CREDENCIALS')}",
-        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD_CREDENCIALS')}"
+        "username": f"{os.getenv('MARIA_QUITERIA_USERNAME_CREDENCIALS')}",
+        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD_CREDENCIALS')}",
     }
 
     token_response = requests.post(url, headers=headers, data=data)
-    logger.info('Getting token from Maria Quitéria')
+    logger.info("Getting token from Maria Quitéria")
 
     if token_response.status_code == 200:
-        new_token = f"Bearer {token_response.json()['access']}"
-        return new_token
+        return f"Bearer {token_response.json()['access']}"
     else:
-        logger.info('Something went wrong creating token')
+        logger.error(token_response.raise_for_status())
 
 
 def get_todays_gazette():
@@ -58,7 +55,6 @@ def get_todays_gazette():
     try:
         logger.info("Looking for gazettes")
         response = requests.get(url, headers=headers, params=params)
-
         response_json = response.json()
 
         gazettes = [result for result in response_json["results"]]
