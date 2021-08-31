@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from loguru import logger
 
 load_dotenv()
-ATTEMPTS_TO_POST_GAZETTES = 3
 
 
 def tweet(message: str):
@@ -15,26 +14,31 @@ def tweet(message: str):
     auth.set_access_token(os.getenv("ACCESS_TOKEN"), os.getenv("ACCESS_TOKEN_SECRET"))
 
     api = tweepy.API(auth)
-    api.update_status(message)
-    logger.info("The gazette was posted on twitter!")
+    try:
+        api.update_status(message)
+        logger.info("The gazette was posted on twitter!")
+    except tweepy.TweepError as e:
+        logger.exception(e)
 
 
-def refresh_maria_quiteria_api_token():
+def create_maria_quiteria_api_token():
     headers = {
         "content_Type": "application/json"
     }
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
     data = {
-        "username":f"{os.getenv('USERNAME_CREDENCIALS')}",
-        "password": f"{os.getenv('PASSWORD_CREDENCIALS')}"
+        "username":f"{os.getenv('MARIA_QUITERIA_USERNAME_CREDENCIALS')}",
+        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD_CREDENCIALS')}"
     }
 
-    refresh_token_response = requests.post(url, headers=headers, data=data)
-    if refresh_token_response.status_code == 200:
-        logger.info('New token created')
-        new_token = f"Bearer {refresh_token_response.json()['access']}"    
+    token_response = requests.post(url, headers=headers, data=data)
+    logger.info('Getting token from Maria Quitéria')
 
-    return new_token
+    if token_response.status_code == 200:
+        new_token = f"Bearer {token_response.json()['access']}"
+        return new_token
+    else:
+        logger.info('Something went wrong creating token')
 
 
 def get_todays_gazette():
@@ -42,33 +46,25 @@ def get_todays_gazette():
 
     date_today = datetime.date.today().strftime("%Y-%m-%d")
 
+    token_maria_quiteria = create_maria_quiteria_api_token()
+
     params = {"start_date": date_today}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": os.getenv("MARIA_QUITERIA_API_TOKEN"),
+        "Authorization": token_maria_quiteria,
     }
-    success = False
-    number_of_attempts = 0
-    while success is False and number_of_attempts < ATTEMPTS_TO_POST_GAZETTES:
-        try:
-            logger.info("Looking for gazettes")
-            response = requests.get(url, headers=headers, params=params)
-            response_json = response.json()
 
-            gazettes = [result for result in response_json["results"]]
-            success = True
-        except KeyError as e:
-            logger.exception(e)
-            if response.status_code in [401, 403] and response_json['code'] == "token_not_valid":
-                logger.info("Token is invalid or expired. Getting new token")
-                new_token = refresh_maria_quiteria_api_token()
-                headers["Authorization"] = new_token
-            number_of_attempts += 1
-            logger.info(f"Trying to get gazettes again. Attempt {number_of_attempts}/{ATTEMPTS_TO_POST_GAZETTES}.")
-            if number_of_attempts == 3:
-                raise KeyError
-            continue
+    try:
+        logger.info("Looking for gazettes")
+        response = requests.get(url, headers=headers, params=params)
+
+        response_json = response.json()
+
+        gazettes = [result for result in response_json["results"]]
+    except KeyError as e:
+        logger.exception(e)
+        raise KeyError
 
     logger.info(f"Number of gazettes found: {len(gazettes)}")
     return gazettes
