@@ -29,27 +29,22 @@ def create_maria_quiteria_api_token():
         "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD_CREDENCIALS')}",
     }
 
-    token_response = requests.post(url, headers=headers, data=data)
     logger.info("Getting token from Maria Quitéria")
+    token_response = requests.post(url, headers=headers, data=data)
+    token_response.raise_for_status()
 
-    if token_response.status_code == 200:
-        return f"Bearer {token_response.json()['access']}"
-    else:
-        logger.error(token_response.raise_for_status())
+    return token_response.json()["access"]
 
 
 def get_todays_gazette():
-    gazettes = []
-
     date_today = datetime.date.today().strftime("%Y-%m-%d")
-
     token_maria_quiteria = create_maria_quiteria_api_token()
 
     params = {"start_date": date_today}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": token_maria_quiteria,
+        "Authorization": f"Bearer {token_maria_quiteria}",
     }
 
     try:
@@ -58,21 +53,20 @@ def get_todays_gazette():
         response_json = response.json()
 
         gazettes = [result for result in response_json["results"]]
+        logger.info(f"Number of gazettes found: {len(gazettes)}")
     except KeyError as e:
         logger.exception(e)
         raise KeyError
 
-    logger.info(f"Number of gazettes found: {len(gazettes)}")
     return gazettes
 
 
 def post_todays_gazette(gazettes: list):
-    date_today = datetime.date.today().strftime("%Y-%m-%d")
     for gazette in gazettes:
         tweet_message = (
             f"Saiu uma nova edição do #DiárioOficial do poder {gazette['power']} "
-            f"de #FeiradeSantana ({date_today} - {gazette['year_and_edition']}). 📰\n"
-            f"{gazette['files'][0]['url']}"
+            f"de #FeiradeSantana ({gazette['date']} - {gazette['year_and_edition']}). "
+            f"📰\n{gazette['files'][0]['url']}"
         )
         tweet(tweet_message)
 
