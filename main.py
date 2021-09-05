@@ -25,8 +25,8 @@ def create_maria_quiteria_api_token():
     headers = {"content_Type": "application/json"}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
     data = {
-        "username": f"{os.getenv('MARIA_QUITERIA_USERNAME_CREDENCIALS')}",
-        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD_CREDENCIALS')}",
+        "username": f"{os.getenv('MARIA_QUITERIA_USERNAME')}",
+        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD')}",
     }
 
     logger.info("Getting token from Maria Quitéria")
