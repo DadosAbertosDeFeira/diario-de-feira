@@ -1,9 +1,12 @@
 from unittest.mock import call
 
-from main import get_todays_gazette, tweet
+import pytest
+from requests import HTTPError
+
+from main import create_maria_quiteria_api_token, get_todays_gazette, tweet
 
 
-def test_if_tweet_was_post_on_twitter(mocker):
+def test_if_tweet_was_posted_on_twitter(mocker):
     mock_tweepy = mocker.patch("main.tweepy")
     tweet("Hi")
 
@@ -36,6 +39,9 @@ def test_if_get_todays_gazette_return_result(mocker):
         ],
     }
 
+    mock_token = mocker.patch("main.create_maria_quiteria_api_token")
+    mock_token.return_value = "token-fake"
+
     mock_response = mocker.patch("main.requests.get")
     mock_response.return_value.ok = True
     mock_response.return_value.json.return_value = expected_result
@@ -44,3 +50,12 @@ def test_if_get_todays_gazette_return_result(mocker):
 
     assert mock_response.called
     assert result != []
+
+
+def test_raise_exception_when_token_is_not_valid(mocker):
+    mock_response = mocker.patch("main.requests.post")
+    mock_response.return_value.status_code = 401
+    mock_response.return_value.raise_for_status.side_effect = HTTPError
+
+    with pytest.raises(HTTPError):
+        create_maria_quiteria_api_token()

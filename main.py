@@ -4,6 +4,7 @@ import os
 import requests
 import tweepy
 from dotenv import load_dotenv
+from loguru import logger
 
 load_dotenv()
 
@@ -13,37 +14,58 @@ def tweet(message: str):
     auth.set_access_token(os.getenv("ACCESS_TOKEN"), os.getenv("ACCESS_TOKEN_SECRET"))
 
     api = tweepy.API(auth)
-    api.update_status(message)
+    try:
+        api.update_status(message)
+        logger.info("The gazette was posted on twitter!")
+    except tweepy.TweepError as e:
+        logger.exception(e)
+
+
+def create_maria_quiteria_api_token():
+    url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
+    data = {
+        "username": f"{os.getenv('MARIA_QUITERIA_USERNAME')}",
+        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD')}",
+    }
+
+    logger.info("Getting token from Maria Quitéria")
+    token_response = requests.post(url, data=data)
+    token_response.raise_for_status()
+
+    return token_response.json()["access"]
 
 
 def get_todays_gazette():
-    gazettes = []
-
     date_today = datetime.date.today().strftime("%Y-%m-%d")
+    token_maria_quiteria = create_maria_quiteria_api_token()
 
     params = {"start_date": date_today}
-    url = os.getenv("MARIA_QUITERIA_API_URL")
+    url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": os.getenv("MARIA_QUITERIA_API_TOKEN"),
+        "Authorization": f"Bearer {token_maria_quiteria}",
     }
 
-    response = requests.get(url, headers=headers, params=params)
-    response_json = response.json()
+    try:
+        logger.info("Looking for gazettes")
+        response = requests.get(url, headers=headers, params=params)
+        response_json = response.json()
 
-    for result in response_json["results"]:
-        gazettes.append(result)
+        gazettes = [result for result in response_json["results"]]
+        logger.info(f"Number of gazettes found: {len(gazettes)}")
+    except KeyError as e:
+        logger.exception(e)
+        raise KeyError
 
     return gazettes
 
 
 def post_todays_gazette(gazettes: list):
-    date_today = datetime.date.today().strftime("%Y-%m-%d")
     for gazette in gazettes:
         tweet_message = (
             f"Saiu uma nova edição do #DiárioOficial do poder {gazette['power']} "
-            f"de #FeiradeSantana ({date_today} - {gazette['year_and_edition']}). 📰\n"
-            f"{gazette['files'][0]['url']}"
+            f"de #FeiradeSantana ({gazette['date']} - {gazette['year_and_edition']}). "
+            f"📰\n{gazette['files'][0]['url']}"
         )
         tweet(tweet_message)
 
