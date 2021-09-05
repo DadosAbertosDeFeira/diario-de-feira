@@ -22,7 +22,6 @@ def tweet(message: str):
 
 
 def create_maria_quiteria_api_token():
-    headers = {"content_Type": "application/json"}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
     data = {
         "username": f"{os.getenv('MARIA_QUITERIA_USERNAME')}",
@@ -30,7 +29,7 @@ def create_maria_quiteria_api_token():
     }
 
     logger.info("Getting token from Maria Quitéria")
-    token_response = requests.post(url, headers=headers, data=data)
+    token_response = requests.post(url, data=data)
     token_response.raise_for_status()
 
     return token_response.json()["access"]
