@@ -1,9 +1,6 @@
 import ast
 import datetime
-import json
 import os
-import pdb
-from typing import Optional
 
 import requests
 import tweepy
@@ -78,6 +75,8 @@ def post_todays_gazette(gazettes: list):
 
         number_of_events = len(gazette["events"])
         logger.info(f"Quantidade de events encontrados: {number_of_events}")
+
+        # TODO usar extract_keywords
 
         mapped_keywords = {}
         keywords = ast.literal_eval(os.getenv("KEYWORDS"))
