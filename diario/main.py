@@ -1,11 +1,13 @@
-import ast
-import datetime
 import os
-
-import requests
+import json
 import tweepy
-from dotenv import load_dotenv
+import requests
+import datetime
+
 from loguru import logger
+from dotenv import load_dotenv
+
+from diario.meaning import extract_keywords
 
 load_dotenv()
 
@@ -72,50 +74,14 @@ def post_todays_gazette(gazettes: list):
         )
 
         tweet_id = tweet(tweet_message)
+        keywords = json.loads(os.getenv("KEYWORDS"))
+        found_topics = extract_keywords(gazette, keywords)
 
-        number_of_events = len(gazette["events"])
-        logger.info(f"Quantidade de events encontrados: {number_of_events}")
-
-        # TODO usar extract_keywords
-
-        mapped_keywords = {}
-        keywords = ast.literal_eval(os.getenv("KEYWORDS"))
-        for event in gazette["events"]:
-            for keyword in keywords:
-                if keyword in event["title"].lower():
-                    number_of_events -= 1
-                    if keyword in mapped_keywords:
-                        mapped_keywords[keyword] += 1
-                        break
-                    else:
-                        mapped_keywords[keyword] = 1
-                        break
-
-        list_events = []
-        for key, value in mapped_keywords.items():
-            message = f"{key}({value})"
-            list_events.append(message)
-
-        reply_message = f"Nele temos: {', '.join(list_events)}"
+        reply_message = f"Nele temos: {', '.join(found_topics)}"
         tweet_id = tweet(reply_message, tweet_id)
-
-        mapped_subjects = []
-        subject_keywords = ast.literal_eval(os.getenv("SUBJECT_KEYWORDS"))
-        for event in gazette["events"]:
-            for subject in subject_keywords:
-                if (
-                    subject in event["secretariat"].lower()
-                    and subject not in mapped_subjects
-                ):
-                    mapped_subjects.append(subject)
-
-        if mapped_subjects != []:
-            reply_message_subject = (
-                f"Alguns assuntos tratados foram: {', '.join(mapped_subjects)}"
-            )
-            tweet_id = tweet(reply_message_subject, tweet_id)
+        print(reply_message)
 
 
-if __name__ == "__main__":
-    gazettes = get_todays_gazette()
-    post_todays_gazette(gazettes)
+# if __name__ == "__main__":
+#     gazettes = get_todays_gazette()
+#     post_todays_gazette(gazettes)

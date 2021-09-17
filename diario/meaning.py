@@ -1,8 +1,12 @@
+import os
+import json
+
+from loguru import logger
 from typing import Dict
 
 
 def extract_keywords(text: str, keywords: Dict[str, list]) -> list:
-    text = text.lower()
+    text = str(text).lower()
     found_topics = []
     for topic, words in keywords.items():
         for word in words:

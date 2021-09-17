@@ -1,0 +1,1 @@
+from diario.meaning import *

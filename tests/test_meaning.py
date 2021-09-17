@@ -26,5 +26,18 @@ def test_extract_keywords_from_a_text():
     assert extract_keywords(text, keywords) == expected
 
 
+def test_extract_keywords_if_text_empty():
+    text = ""
+    keywords = {
+        "decretos": ["decreto"],
+        "contratações": ["nomea", "exonera"],
+        "pandemia": ["covid", "coronavirus", "pandemia", "Coronavírus", "COVID-19"],
+    }
+
+    expected = []
+    assert extract_keywords(text, keywords) == expected
+
+
+
 # TODO oq acontece se o texto está vazio ou nulo?
 # TODO Ou se tem um texto válido mas keywords está vazio ({})?
