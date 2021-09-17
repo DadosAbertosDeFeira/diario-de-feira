@@ -1,11 +1,11 @@
-import os
-import json
-import tweepy
-import requests
 import datetime
+import json
+import os
 
-from loguru import logger
+import requests
+import tweepy
 from dotenv import load_dotenv
+from loguru import logger
 
 from diario.meaning import extract_keywords
 
@@ -74,14 +74,17 @@ def post_todays_gazette(gazettes: list):
         )
 
         tweet_id = tweet(tweet_message)
-        keywords = json.loads(os.getenv("KEYWORDS"))
-        found_topics = extract_keywords(gazette, keywords)
+        keywords = json.loads(os.getenv("KEYWORDS", "{}"))
+
+        events_text = "".join(event["summary"] for event in gazette["events"])
+        found_topics = extract_keywords(events_text, keywords)
+        # TODO só tweetar se found_topics existe + teste
 
         reply_message = f"Nele temos: {', '.join(found_topics)}"
         tweet_id = tweet(reply_message, tweet_id)
         print(reply_message)
 
 
-# if __name__ == "__main__":
+# if __name__ == "__main__":  # FIXME
 #     gazettes = get_todays_gazette()
 #     post_todays_gazette(gazettes)

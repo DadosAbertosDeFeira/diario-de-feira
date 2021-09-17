@@ -3,7 +3,12 @@ from unittest.mock import call
 import pytest
 from requests import HTTPError
 
-from diario.main import create_maria_quiteria_api_token, get_todays_gazette, tweet
+from diario.main import (
+    create_maria_quiteria_api_token,
+    get_todays_gazette,
+    post_todays_gazette,
+    tweet,
+)
 
 
 def test_if_tweet_was_posted_on_twitter(mocker):
@@ -59,3 +64,36 @@ def test_raise_exception_when_token_is_not_valid(mocker):
 
     with pytest.raises(HTTPError):
         create_maria_quiteria_api_token()
+
+
+def test_thread_creation_when_there_are_events(mocker, monkeypatch):
+    monkeypatch.setenv("KEYWORDS", '{"rh": ["folha de pagamento"]}')
+    mock_tweet = mocker.patch("diario.main.tweet")
+    gazettes = [
+        {
+            "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br",
+            "date": "2021-09-07",
+            "power": "executivo",
+            "year_and_edition": "Ano VII - Edição Nº 1851",
+            "events": [
+                {
+                    "title": "INEXIGIBILIDADE DE LICITAÇÃO Nº 219-2021-05I",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "INSCRIÇÃO DE CURSO PRESENCIAL DE CAPACITAÇÃO.",
+                    "published_on": None,
+                },
+                {
+                    "title": "DISPENSA DE CHAMAMENTO PÚBLICO Nº 276-2021-12D",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "PAGAMENTO DE FOLHA DE PAGAMENTO.",
+                    "published_on": None,
+                },
+            ],
+            "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
+        }
+    ]
+
+    post_todays_gazette(gazettes)
+
+    assert mock_tweet.called
+    assert "Nele temos: rh" in mock_tweet.mock_calls[1].args[0]
