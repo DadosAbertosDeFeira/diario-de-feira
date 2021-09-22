@@ -7,9 +7,11 @@ import tweepy
 from dotenv import load_dotenv
 from loguru import logger
 
-from diario.meaning import extract_keywords
+from diario.meaning import extract_keywords, split_tweets
 
 load_dotenv()
+
+CHARACTER_LIMIT = 270
 
 
 def tweet(message: str, tweet_id=None):
@@ -20,7 +22,6 @@ def tweet(message: str, tweet_id=None):
     try:
         tweet = api.update_status(message, tweet_id)
         tweet_id = tweet._json["id_str"]
-        logger.info("The gazette was posted on twitter!")
         return tweet_id
     except tweepy.TweepError as e:
         logger.exception(e)
@@ -72,19 +73,30 @@ def post_todays_gazette(gazettes: list):
             f"de #FeiradeSantana ({gazette['date']} - {gazette['year_and_edition']}). "
             f"📰\n{gazette['files'][0]['url']}"
         )
-
         tweet_id = tweet(tweet_message)
+        logger.info("The gazette was posted on twitter!")
+
         keywords = json.loads(os.getenv("KEYWORDS", "{}"))
-
         events_text = "".join(event["summary"] for event in gazette["events"])
+
         found_topics = extract_keywords(events_text, keywords)
-        # TODO só tweetar se found_topics existe + teste
+        if found_topics:
+            character_number = sum([len(topic_len) for topic_len in found_topics])
+            if character_number > CHARACTER_LIMIT:
+                tweets = split_tweets(found_topics, CHARACTER_LIMIT)
+                for post in tweets:
+                    if tweets[0] == post:
+                        reply_message = f"Nele temos: {', '.join(post)}"
+                    else:
+                        reply_message = f"Temos também: {', '.join(post)}"
+                    tweet_id = tweet(reply_message, tweet_id)
+                    logger.info("The thread was posted")
+            else:
+                reply_message = f"Nele temos: {', '.join(found_topics)}"
+                tweet_id = tweet(reply_message, tweet_id)
+                logger.info("The thread was posted")
 
-        reply_message = f"Nele temos: {', '.join(found_topics)}"
-        tweet_id = tweet(reply_message, tweet_id)
-        print(reply_message)
 
-
-# if __name__ == "__main__":  # FIXME
-#     gazettes = get_todays_gazette()
-#     post_todays_gazette(gazettes)
+if __name__ == "__main__":
+    gazettes = get_todays_gazette()
+    post_todays_gazette(gazettes)

@@ -94,6 +94,65 @@ def test_thread_creation_when_there_are_events(mocker, monkeypatch):
     ]
 
     post_todays_gazette(gazettes)
-
     assert mock_tweet.called
     assert "Nele temos: rh" in mock_tweet.mock_calls[1].args[0]
+
+
+def test_when_need_post_multiple_threads(mocker, monkeypatch):
+    mock_tweet = mocker.patch("diario.main.tweet")
+    monkeypatch.setenv(
+        "KEYWORDS",
+        """
+        {
+            "INEXIGIBILIDADE DE LICITAÇÃO": ["CURSO"],
+            "DISPENSA DE CHAMAMENTO PÚBLICO": ["PAGAMENTO"],
+            "EXTRATO RESUMO DE ADITIVOS": ["Aditivos"]
+        }
+        """,
+    )
+    monkeypatch.setattr("diario.main.CHARACTER_LIMIT", 40)
+    mocker.patch("diario.meaning.split_tweets")
+
+    gazettes = [
+        {
+            "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br",
+            "date": "2021-09-07",
+            "power": "executivo",
+            "year_and_edition": "Ano VII - Edição Nº 1851",
+            "events": [
+                {
+                    "title": "INEXIGIBILIDADE DE LICITAÇÃO Nº 219-2021-05I",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "INSCRIÇÃO DE CURSO PRESENCIAL DE CAPACITAÇÃO.",
+                    "published_on": None,
+                },
+                {
+                    "title": "DISPENSA DE CHAMAMENTO PÚBLICO",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "PAGAMENTO DE FOLHA DE PAGAMENTO.",
+                    "published_on": None,
+                },
+                {
+                    "title": "EXTRATO RESUMO DE ADITIVOS",
+                    "secretariat": "CÂMARA MUNICIPAL",
+                    "summary": "Extrato Resumo dos Aditivos Firmados em setembro",
+                    "published_on": None,
+                },
+            ],
+            "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
+        }
+    ]
+
+    post_todays_gazette(gazettes)
+
+    assert mock_tweet.call_count == 4
+    assert (
+        "Nele temos: inexigibilidade de licitação" in mock_tweet.mock_calls[1].args[0]
+    )
+    assert (
+        "Temos também: dispensa de chamamento público"
+        in mock_tweet.mock_calls[2].args[0]
+    )
+    assert (
+        "Temos também: extrato resumo de aditivos" in mock_tweet.mock_calls[3].args[0]
+    )
