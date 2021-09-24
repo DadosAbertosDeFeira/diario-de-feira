@@ -3,16 +3,21 @@ from unittest.mock import call
 import pytest
 from requests import HTTPError
 
-from main import create_maria_quiteria_api_token, get_todays_gazette, tweet
+from diario.main import (
+    create_maria_quiteria_api_token,
+    get_todays_gazette,
+    post_todays_gazette,
+    tweet,
+)
 
 
 def test_if_tweet_was_posted_on_twitter(mocker):
-    mock_tweepy = mocker.patch("main.tweepy")
+    mock_tweepy = mocker.patch("diario.main.tweepy")
     tweet("Hi")
 
     assert mock_tweepy.OAuthHandler.called
     assert mock_tweepy.API.called
-    assert call().update_status("Hi") in mock_tweepy.API.mock_calls
+    assert call().update_status("Hi", None) in mock_tweepy.API.mock_calls
 
 
 def test_if_get_todays_gazette_return_result(mocker):
@@ -39,10 +44,10 @@ def test_if_get_todays_gazette_return_result(mocker):
         ],
     }
 
-    mock_token = mocker.patch("main.create_maria_quiteria_api_token")
+    mock_token = mocker.patch("diario.main.create_maria_quiteria_api_token")
     mock_token.return_value = "token-fake"
 
-    mock_response = mocker.patch("main.requests.get")
+    mock_response = mocker.patch("diario.main.requests.get")
     mock_response.return_value.ok = True
     mock_response.return_value.json.return_value = expected_result
 
@@ -53,9 +58,101 @@ def test_if_get_todays_gazette_return_result(mocker):
 
 
 def test_raise_exception_when_token_is_not_valid(mocker):
-    mock_response = mocker.patch("main.requests.post")
+    mock_response = mocker.patch("diario.main.requests.post")
     mock_response.return_value.status_code = 401
     mock_response.return_value.raise_for_status.side_effect = HTTPError
 
     with pytest.raises(HTTPError):
         create_maria_quiteria_api_token()
+
+
+def test_thread_creation_when_there_are_events(mocker, monkeypatch):
+    monkeypatch.setenv("KEYWORDS", '{"rh": ["folha de pagamento"]}')
+    mock_tweet = mocker.patch("diario.main.tweet")
+    gazettes = [
+        {
+            "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br",
+            "date": "2021-09-07",
+            "power": "executivo",
+            "year_and_edition": "Ano VII - Edição Nº 1851",
+            "events": [
+                {
+                    "title": "INEXIGIBILIDADE DE LICITAÇÃO Nº 219-2021-05I",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "INSCRIÇÃO DE CURSO PRESENCIAL DE CAPACITAÇÃO.",
+                    "published_on": None,
+                },
+                {
+                    "title": "DISPENSA DE CHAMAMENTO PÚBLICO Nº 276-2021-12D",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "PAGAMENTO DE FOLHA DE PAGAMENTO.",
+                    "published_on": None,
+                },
+            ],
+            "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
+        }
+    ]
+
+    post_todays_gazette(gazettes)
+    assert mock_tweet.called
+    assert "Nele temos: rh" in mock_tweet.mock_calls[1].args[0]
+
+
+def test_when_need_post_multiple_threads(mocker, monkeypatch):
+    mock_tweet = mocker.patch("diario.main.tweet")
+    monkeypatch.setenv(
+        "KEYWORDS",
+        """
+        {
+            "INEXIGIBILIDADE DE LICITAÇÃO": ["CURSO"],
+            "DISPENSA DE CHAMAMENTO PÚBLICO": ["PAGAMENTO"],
+            "EXTRATO RESUMO DE ADITIVOS": ["Aditivos"]
+        }
+        """,
+    )
+    monkeypatch.setattr("diario.main.CHARACTER_LIMIT", 40)
+    mocker.patch("diario.meaning.split_tweets")
+
+    gazettes = [
+        {
+            "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br",
+            "date": "2021-09-07",
+            "power": "executivo",
+            "year_and_edition": "Ano VII - Edição Nº 1851",
+            "events": [
+                {
+                    "title": "INEXIGIBILIDADE DE LICITAÇÃO Nº 219-2021-05I",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "INSCRIÇÃO DE CURSO PRESENCIAL DE CAPACITAÇÃO.",
+                    "published_on": None,
+                },
+                {
+                    "title": "DISPENSA DE CHAMAMENTO PÚBLICO",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "PAGAMENTO DE FOLHA DE PAGAMENTO.",
+                    "published_on": None,
+                },
+                {
+                    "title": "EXTRATO RESUMO DE ADITIVOS",
+                    "secretariat": "CÂMARA MUNICIPAL",
+                    "summary": "Extrato Resumo dos Aditivos Firmados em setembro",
+                    "published_on": None,
+                },
+            ],
+            "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
+        }
+    ]
+
+    post_todays_gazette(gazettes)
+
+    assert mock_tweet.call_count == 4
+    assert (
+        "Nele temos: inexigibilidade de licitação" in mock_tweet.mock_calls[1].args[0]
+    )
+    assert (
+        "Temos também: dispensa de chamamento público"
+        in mock_tweet.mock_calls[2].args[0]
+    )
+    assert (
+        "Temos também: extrato resumo de aditivos" in mock_tweet.mock_calls[3].args[0]
+    )
