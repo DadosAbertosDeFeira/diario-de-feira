@@ -81,11 +81,11 @@ def post_todays_gazette(gazettes: list):
 
         found_topics = extract_keywords(events_text, keywords)
         if found_topics:
-            character_number = sum([len(topic_len) for topic_len in found_topics])
+            character_number = sum(len(topic_len) for topic_len in found_topics)
             if character_number > CHARACTER_LIMIT:
                 tweets = split_tweets(found_topics, CHARACTER_LIMIT)
-                for post in tweets:
-                    if tweets[0] == post:
+                for index, post in enumerate(tweets):
+                    if index == 0:
                         reply_message = f"Nele temos: {', '.join(post)}"
                     else:
                         reply_message = f"Temos também: {', '.join(post)}"
@@ -93,7 +93,7 @@ def post_todays_gazette(gazettes: list):
                     logger.info("The thread was posted")
             else:
                 reply_message = f"Nele temos: {', '.join(found_topics)}"
-                tweet_id = tweet(reply_message, tweet_id)
+                tweet(reply_message, tweet_id)
                 logger.info("The thread was posted")
 
 

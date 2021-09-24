@@ -17,14 +17,11 @@ def split_tweets(found_topics: list, character_limit: int):
     character_sum = 0
 
     for word in found_topics:
-        if character_sum + len(word) < character_limit:
-            tweet.append(word)
-        else:
+        if character_sum + len(word) >= character_limit:
             tweet_list.append(tweet)
             tweet = []
-            tweet.append(word)
-
-        character_sum = sum([len(item) for item in tweet])
+        tweet.append(word)
+        character_sum = sum(len(item) for item in tweet)
 
     tweet_list.append(tweet)
     return tweet_list
