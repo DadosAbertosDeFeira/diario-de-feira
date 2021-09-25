@@ -74,6 +74,8 @@ def post_todays_gazette(gazettes: list):
             f"📰\n{gazette['files'][0]['url']}"
         )
         tweet_id = tweet(tweet_message)
+        if tweet_id is None:
+            continue
         logger.info("The gazette was posted on twitter!")
 
         keywords = json.loads(os.getenv("KEYWORDS", "{}"))
