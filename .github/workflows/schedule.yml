@@ -1,5 +1,6 @@
 name: Agendamento de postagens de tweets
 on:
+  workflow_dispatch:
   schedule:
     # todos os dias às 08 horas do Brasil (11:00:00 UTC)
     - cron: '0 11 * * *'
