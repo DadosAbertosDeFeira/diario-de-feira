@@ -79,9 +79,12 @@ def post_todays_gazette(gazettes: list):
         logger.info("The gazette was posted on twitter!")
 
         keywords = json.loads(os.getenv("KEYWORDS", "{}"))
+        if keywords:
+            logger.info("Keywords were found.")
         events_text = "".join(event["summary"] for event in gazette["events"])
 
         found_topics = extract_keywords(events_text, keywords)
+        logger.info(f"Number of found topics: {len(found_topics)}")
         if found_topics:
             character_number = sum(len(topic_len) for topic_len in found_topics)
             if character_number > CHARACTER_LIMIT:
