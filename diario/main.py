@@ -66,6 +66,12 @@ def get_todays_gazette():
     return gazettes
 
 
+def read_keywords():
+    keywords = os.getenv("KEYWORDS") or open("default_keywords.json").read()
+    logger.info(f"Keywords:\n{keywords}")
+    return json.loads(keywords)
+
+
 def post_todays_gazette(gazettes: list):
     for gazette in gazettes:
         tweet_message = (
@@ -78,10 +84,12 @@ def post_todays_gazette(gazettes: list):
             continue
         logger.info("The gazette was posted on twitter!")
 
-        keywords = json.loads(os.getenv("KEYWORDS", "{}"))
+        keywords = read_keywords()
         if keywords:
-            logger.info("Keywords were found.")
-        events_text = "".join(event["summary"] for event in gazette["events"])
+            logger.info("Keywords found.")
+        events_text = "".join(
+            f"{event['title']} {event['summary']}" for event in gazette["events"]
+        )
 
         found_topics = extract_keywords(events_text, keywords)
         logger.info(f"Number of found topics: {len(found_topics)}")
