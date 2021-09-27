@@ -156,3 +156,44 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
     assert (
         "Temos também: extrato resumo de aditivos" in mock_tweet.mock_calls[3].args[0]
     )
+
+
+def test_read_default_keywords_from_file(mocker):
+    mock_tweet = mocker.patch("diario.main.tweet")
+    gazettes = [
+        {
+            "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br/",
+            "date": "2021-09-25",
+            "power": "executivo",
+            "year_and_edition": "Ano VII - Edição Nº 1870",
+            "events": [
+                {
+                    "title": "Editais - Auto de Infração nº 127/2021 a 142/2021",
+                    "secretariat": "SESP - Serviços Públicos",
+                    "summary": "Referente a não retirada de material de construção "
+                    "e entulho na via pública e a não construção de muro "
+                    "e passeio em terreno baldio.",
+                    "published_on": None,
+                },
+                {
+                    "title": "ADITIVOS",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "ADITIVO Nº 440-2021-12AC.",
+                    "published_on": None,
+                },
+                {
+                    "title": "DECRETO Nº 12.347, DE 24 DE SETEMBRO DE 2021.",
+                    "secretariat": "Gabinete do Prefeito",
+                    "summary": "Abre crédito suplementar ao Orçamento do Município",
+                    "published_on": None,
+                },
+            ],
+            "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
+        }
+    ]
+    expected_tweet = "Nele temos: decretos, aditivos, intimação"
+
+    post_todays_gazette(gazettes)
+
+    assert mock_tweet.call_count == 2
+    assert expected_tweet in mock_tweet.mock_calls[1].args[0]
