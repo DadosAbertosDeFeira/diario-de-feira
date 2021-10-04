@@ -158,8 +158,9 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
     )
 
 
-def test_read_default_keywords_from_file(mocker):
+def test_read_default_keywords_from_file(mocker, monkeypatch):
     mock_tweet = mocker.patch("diario.main.tweet")
+    monkeypatch.delenv("KEYWORDS", raising=False)
     gazettes = [
         {
             "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br/",
