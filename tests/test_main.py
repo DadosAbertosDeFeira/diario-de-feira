@@ -158,8 +158,9 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
     )
 
 
-def test_read_default_keywords_from_file(mocker):
+def test_read_default_keywords_from_file(mocker, monkeypatch):
     mock_tweet = mocker.patch("diario.main.tweet")
+    monkeypatch.delenv("KEYWORDS", raising=False)
     gazettes = [
         {
             "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br/",
@@ -191,7 +192,7 @@ def test_read_default_keywords_from_file(mocker):
             "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
         }
     ]
-    expected_tweet = "Nele temos: decretos, aditivos"
+    expected_tweet = "Nele temos: decretos, aditivos, intimação"
 
     post_todays_gazette(gazettes)
 

@@ -16,12 +16,13 @@ publica em outros locais para serem vistos e acessados pela população
 
 - Alguns pré-requisitos necessários:
     - Ter o [Python](https://www.python.org/downloads/) instalado na sua máquina, aqui estamos usando a versão 3.9.5.
-    - Ter também, o [Poetry]((https://python-poetry.org/docs/master/#installation)) instalado na sua máquina. É com ele que vamos gerenciar todas as nossas dependências e criar nosso ambiente virtual.
+    - Ter também, o [Poetry](https://python-poetry.org/docs/master/#installation) instalado na sua máquina. É com ele que vamos gerenciar todas as nossas dependências e criar nosso ambiente virtual.
 - Após a instalação do Poetry, vamos instalar as dependências usando:
 
 ```
 poetry install
 ```
+
 - Depois iremos iniciar o ambiente virtual usando o shell do poetry:
 
 ```
@@ -32,9 +33,11 @@ Execute também o `pre-commit install` e `pre-commit` para garantir que o seu c�
 de acordo com o estilo do projeto a cada commit novo.
 
 ## Configurando variáveis de ambiente
-As variáveis de ambiente deverão ser incluídas em um arquivo chamado `.env`. Deixamos o arquivo `.env-sample` na raíz do projeto pra ser usado como referência na criação do seu arquivo .env, nele estão todas as variáveis que o projeto necessita.
+
+As variáveis de ambiente deverão ser incluídas em um arquivo chamado `.env`. Deixamos o arquivo `.env-sample` na raíz do projeto pra ser usado como referência na criação do seu arquivo `.env`. Nele estão todas as variáveis que o projeto necessita.
 
 ## Rodando o projeto
+
 ```
 python diario/main.py
 ```
