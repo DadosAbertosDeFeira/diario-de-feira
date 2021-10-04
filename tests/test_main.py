@@ -191,7 +191,7 @@ def test_read_default_keywords_from_file(mocker):
             "files": [{"url": "http://diariooficial.feiradesantana.ba.gov.br/"}],
         }
     ]
-    expected_tweet = "Nele temos: decretos, aditivos, intimação"
+    expected_tweet = "Nele temos: decretos, aditivos"
 
     post_todays_gazette(gazettes)
 

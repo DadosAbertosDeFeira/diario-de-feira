@@ -12,29 +12,32 @@ sobre a publicação de edições do Diário Oficial de um município e as
 publica em outros locais para serem vistos e acessados pela população
 (e.g. Twitter, Discord).
 
-## Pré-requisitos
+## Configurando o ambiente
 
-- Ter o [Python](https://www.python.org/downloads/) instalado na sua máquina, aqui estamos usando a versão 3.9.5.
-- Com o python instalado, é preferível que você tenha um [ambiente virtual](https://docs.python.org/pt-br/3/tutorial/venv.html) para o projeto. Para criar, use os comandos:
-
-```
-python3 -m venv venv  # Cria o ambiente virtual
-source venv/bin/activate  # Ativa
-pip install --upgrade pip  # Upgrade pip
-```
-
-Feito isso, estamos prontos para a instalação das dependências.
-
-## Dependências
-
-Para a instalação das dependências, com seu ambiente virtual ativado, use o comando:
+- Alguns pré-requisitos necessários:
+    - Ter o [Python](https://www.python.org/downloads/) instalado na sua máquina, aqui estamos usando a versão 3.9.5.
+    - Ter também, o [Poetry]((https://python-poetry.org/docs/master/#installation)) instalado na sua máquina. É com ele que vamos gerenciar todas as nossas dependências e criar nosso ambiente virtual.
+- Após a instalação do Poetry, vamos instalar as dependências usando:
 
 ```
-pip install -r requirements.txt
+poetry install
+```
+- Depois iremos iniciar o ambiente virtual usando o shell do poetry:
+
+```
+poetry shell
 ```
 
 Execute também o `pre-commit install` e `pre-commit` para garantir que o seu código esteja formatado
 de acordo com o estilo do projeto a cada commit novo.
+
+## Configurando variáveis de ambiente
+As variáveis de ambiente deverão ser incluídas em um arquivo chamado `.env`. Deixamos o arquivo `.env-sample` na raíz do projeto pra ser usado como referência na criação do seu arquivo .env, nele estão todas as variáveis que o projeto necessita.
+
+## Rodando o projeto
+```
+python diario/main.py
+```
 
 ## Executando os testes
 
