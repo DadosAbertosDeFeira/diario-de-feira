@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "diario"
+version = "0.1.0"
+description = "O que acontece no Diário Oficial no seu Twitter"
+authors = ["Dados Abertos de Feira <dadosabertosdefeira@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://www.dadosabertosdefeira.com.br"
+repository = "https://github.com/DadosAbertosDeFeira/diario-de-feira"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tweepy = "^3.10.0"
+python-dotenv = "^0.19.0"
+
+[tool.poetry.dev-dependencies]
+loguru = "^0.5.3"
+pre-commit = "^2.14.0"
+pytest = "^6.2.4"
+pytest-mock = "^3.6.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
