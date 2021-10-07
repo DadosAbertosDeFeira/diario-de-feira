@@ -55,6 +55,7 @@ def get_todays_gazette():
     try:
         logger.info("Looking for gazettes")
         response = requests.get(url, headers=headers, params=params)
+        logger.debug(response)
         response_json = response.json()
 
         gazettes = [result for result in response_json["results"]]
