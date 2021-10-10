@@ -1,6 +1,6 @@
-import datetime
 import json
 import os
+from datetime import date, datetime
 
 import requests
 import tweepy
@@ -42,7 +42,7 @@ def create_maria_quiteria_api_token():
 
 
 def get_todays_gazette():
-    date_today = datetime.date.today().strftime("%Y-%m-%d")
+    date_today = date.today().strftime("%Y-%m-%d")
     token_maria_quiteria = create_maria_quiteria_api_token()
 
     params = {"start_date": date_today}
@@ -75,9 +75,10 @@ def read_keywords():
 
 def post_todays_gazette(gazettes: list):
     for gazette in gazettes:
+        date_br = datetime.strptime(gazette["date"], "%Y-%m-%d").strftime("%d/%m/%y")
         tweet_message = (
             f"Saiu uma nova edição do #DiárioOficial do poder {gazette['power']} "
-            f"de #FeiradeSantana ({gazette['date']} - {gazette['year_and_edition']}). "
+            f"de #FeiradeSantana ({date_br} - {gazette['year_and_edition']}). "
             f"📰\n{gazette['files'][0]['url']}"
         )
         tweet_id = tweet(tweet_message)

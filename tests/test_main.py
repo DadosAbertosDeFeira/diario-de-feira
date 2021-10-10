@@ -198,3 +198,31 @@ def test_read_default_keywords_from_file(mocker, monkeypatch):
 
     assert mock_tweet.call_count == 2
     assert expected_tweet in mock_tweet.mock_calls[1].args[0]
+
+
+def test_date_format_is_correct(mocker):
+    mock_tweet = mocker.patch("diario.main.tweet")
+
+    gazettes = [
+        {
+            "crawled_from": "...",
+            "date": "2021-08-14",
+            "power": "legislativo",
+            "year_and_edition": "Ano xxx - Edição Nº xxx",
+            "events": [
+                {
+                    "title": "TEXT",
+                    "secretariat": "TEXT",
+                    "summary": "TEXT",
+                    "published_on": None,
+                }
+            ],
+            "files": [{"url": "..."}],
+        }
+    ]
+
+    expected_date = "14/08/21"
+
+    post_todays_gazette(gazettes)
+
+    assert expected_date in mock_tweet.mock_calls[0].args[0]
