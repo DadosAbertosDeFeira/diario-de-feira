@@ -55,7 +55,6 @@ def get_todays_gazette():
     try:
         logger.info("Looking for gazettes")
         response = requests.get(url, headers=headers, params=params)
-        logger.debug(response)
         response_json = response.json()
 
         gazettes = [result for result in response_json["results"]]
@@ -65,12 +64,6 @@ def get_todays_gazette():
         raise KeyError
 
     return gazettes
-
-
-def read_keywords():
-    keywords = os.getenv("KEYWORDS") or open("default_keywords.json").read()
-    logger.info(f"Keywords:\n{keywords}")
-    return json.loads(keywords)
 
 
 def post_todays_gazette(gazettes: list):
@@ -86,7 +79,7 @@ def post_todays_gazette(gazettes: list):
             continue
         logger.info("The gazette was posted on twitter!")
 
-        keywords = read_keywords()
+        keywords = json.loads(os.getenv("KEYWORDS", "{}"))
         if keywords:
             logger.info("Keywords found.")
         events_text = "".join(
