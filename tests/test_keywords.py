@@ -1,4 +1,4 @@
-from diario.meaning import extract_keywords, split_tweets
+from diario.keywords import extract_keywords
 
 
 def test_extract_keywords_from_a_text():
@@ -56,18 +56,3 @@ def test_if_keywords_empty():
     keywords = {}
 
     assert extract_keywords(text, keywords) == []
-
-
-def test_split_tweets_return_list():
-    expected_found_topics = [
-        "decretos",
-        "contratações",
-        "dispensa de licitação",
-        "pandemia",
-        "portaria",
-    ]
-    character_limit = 30
-    tweet_list = split_tweets(expected_found_topics, character_limit)
-
-    assert tweet_list != []
-    assert len(tweet_list) == 3

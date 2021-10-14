@@ -1,74 +1,26 @@
 from unittest.mock import call
 
-import pytest
-from requests import HTTPError
-
-from diario.main import (
-    create_maria_quiteria_api_token,
-    get_todays_gazette,
-    post_todays_gazette,
-    tweet,
-)
+from diario.twitter import post_todays_gazette, split_tweets, tweet
 
 
-def test_if_tweet_was_posted_on_twitter(mocker):
-    mock_tweepy = mocker.patch("diario.main.tweepy")
-    tweet("Hi")
+def test_split_tweets_return_list():
+    expected_found_topics = [
+        "decretos",
+        "contratações",
+        "dispensa de licitação",
+        "pandemia",
+        "portaria",
+    ]
+    character_limit = 30
+    tweet_list = split_tweets(expected_found_topics, character_limit)
 
-    assert mock_tweepy.OAuthHandler.called
-    assert mock_tweepy.API.called
-    assert call().update_status("Hi", None) in mock_tweepy.API.mock_calls
-
-
-def test_if_get_todays_gazette_return_result(mocker):
-    expected_result = {
-        "count": 249,
-        "next": "...",
-        "previous": None,
-        "results": [
-            {
-                "crawled_from": "...",
-                "date": "2021-08-14",
-                "power": "legislativo",
-                "year_and_edition": "Ano xxx - Edição Nº xxx",
-                "events": [
-                    {
-                        "title": "TEXT",
-                        "secretariat": "TEXT",
-                        "summary": "TEXT",
-                        "published_on": None,
-                    }
-                ],
-                "files": [{"url": "..."}],
-            }
-        ],
-    }
-
-    mock_token = mocker.patch("diario.main.create_maria_quiteria_api_token")
-    mock_token.return_value = "token-fake"
-
-    mock_response = mocker.patch("diario.main.requests.get")
-    mock_response.return_value.ok = True
-    mock_response.return_value.json.return_value = expected_result
-
-    result = get_todays_gazette()
-
-    assert mock_response.called
-    assert result != []
-
-
-def test_raise_exception_when_token_is_not_valid(mocker):
-    mock_response = mocker.patch("diario.main.requests.post")
-    mock_response.return_value.status_code = 401
-    mock_response.return_value.raise_for_status.side_effect = HTTPError
-
-    with pytest.raises(HTTPError):
-        create_maria_quiteria_api_token()
+    assert tweet_list != []
+    assert len(tweet_list) == 3
 
 
 def test_thread_creation_when_there_are_events(mocker, monkeypatch):
     monkeypatch.setenv("KEYWORDS", '{"rh": ["folha de pagamento"]}')
-    mock_tweet = mocker.patch("diario.main.tweet")
+    mock_tweet = mocker.patch("diario.twitter.tweet")
     gazettes = [
         {
             "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br",
@@ -98,8 +50,17 @@ def test_thread_creation_when_there_are_events(mocker, monkeypatch):
     assert "Nele temos: rh" in mock_tweet.mock_calls[1].args[0]
 
 
+def test_if_tweet_was_posted_on_twitter(mocker):
+    mock_tweepy = mocker.patch("diario.twitter.tweepy")
+    tweet("Hi")
+
+    assert mock_tweepy.OAuthHandler.called
+    assert mock_tweepy.API.called
+    assert call().update_status("Hi", None) in mock_tweepy.API.mock_calls
+
+
 def test_when_need_post_multiple_threads(mocker, monkeypatch):
-    mock_tweet = mocker.patch("diario.main.tweet")
+    mock_tweet = mocker.patch("diario.twitter.tweet")
     monkeypatch.setenv(
         "KEYWORDS",
         """
@@ -110,8 +71,7 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
         }
         """,
     )
-    monkeypatch.setattr("diario.main.CHARACTER_LIMIT", 40)
-    mocker.patch("diario.meaning.split_tweets")
+    monkeypatch.setattr("diario.twitter.CHARACTER_LIMIT", 40)
 
     gazettes = [
         {
@@ -144,7 +104,6 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
     ]
 
     post_todays_gazette(gazettes)
-
     assert mock_tweet.call_count == 4
     assert (
         "Nele temos: inexigibilidade de licitação" in mock_tweet.mock_calls[1].args[0]
@@ -159,7 +118,7 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
 
 
 def test_date_format_is_correct(mocker):
-    mock_tweet = mocker.patch("diario.main.tweet")
+    mock_tweet = mocker.patch("diario.twitter.tweet")
 
     gazettes = [
         {

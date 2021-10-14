@@ -30,4 +30,4 @@ jobs:
           MARIA_QUITERIA_USERNAME: ${{ secrets.MARIA_QUITERIA_USERNAME }}
           MARIA_QUITERIA_PASSWORD: ${{ secrets.MARIA_QUITERIA_PASSWORD }}
           KEYWORDS: ${{ secrets.KEYWORDS }}
-        run: python diario/main.py
+        run: python main.py
