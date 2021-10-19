@@ -39,7 +39,7 @@ As variáveis de ambiente deverão ser incluídas em um arquivo chamado `.env`. 
 ## Rodando o projeto
 
 ```
-python main.py
+python diario_bot/main.py
 ```
 
 ## Executando os testes

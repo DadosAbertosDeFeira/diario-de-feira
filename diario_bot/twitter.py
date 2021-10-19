@@ -4,7 +4,7 @@ from datetime import datetime
 import tweepy
 from loguru import logger
 
-from diario.keywords import extract_keywords, read_keywords
+from diario_bot.keywords import extract_keywords, read_keywords
 
 CHARACTER_LIMIT = 270
 

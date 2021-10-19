@@ -1,11 +1,11 @@
 import pytest
 from requests import HTTPError
 
-from diario.maria_quiteria import create_api_token, get_todays_gazette
+from diario_bot.apis.maria_quiteria import create_api_token, get_todays_gazette
 
 
 def test_raise_exception_when_token_is_not_valid(mocker):
-    mock_response = mocker.patch("diario.maria_quiteria.requests.post")
+    mock_response = mocker.patch("diario_bot.apis.maria_quiteria.requests.post")
     mock_response.return_value.status_code = 401
     mock_response.return_value.raise_for_status.side_effect = HTTPError
 
@@ -37,10 +37,10 @@ def test_if_get_todays_gazette_return_result(mocker):
         ],
     }
 
-    mock_token = mocker.patch("diario.maria_quiteria.create_api_token")
+    mock_token = mocker.patch("diario_bot.apis.maria_quiteria.create_api_token")
     mock_token.return_value = "token-fake"
 
-    mock_response = mocker.patch("diario.maria_quiteria.requests.get")
+    mock_response = mocker.patch("diario_bot.apis.maria_quiteria.requests.get")
     mock_response.return_value.ok = True
     mock_response.return_value.json.return_value = expected_result
 

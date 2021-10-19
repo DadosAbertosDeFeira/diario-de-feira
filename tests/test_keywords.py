@@ -1,5 +1,5 @@
-from diario.keywords import extract_keywords
-from diario.twitter import post_todays_gazette
+from diario_bot.keywords import extract_keywords
+from diario_bot.twitter import post_todays_gazette
 
 
 def test_extract_keywords_from_a_text():
@@ -60,7 +60,7 @@ def test_if_keywords_empty():
 
 
 def test_read_default_keywords_from_file(mocker, monkeypatch):
-    mock_tweet = mocker.patch("diario.twitter.tweet")
+    mock_tweet = mocker.patch("diario_bot.twitter.tweet")
     monkeypatch.delenv("KEYWORDS", raising=False)
     gazettes = [
         {

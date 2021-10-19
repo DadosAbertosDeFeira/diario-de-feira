@@ -1,6 +1,6 @@
 from unittest.mock import call
 
-from diario.twitter import post_todays_gazette, split_tweets, tweet
+from diario_bot.twitter import post_todays_gazette, split_tweets, tweet
 
 
 def test_split_tweets_return_list():
@@ -20,7 +20,7 @@ def test_split_tweets_return_list():
 
 def test_thread_creation_when_there_are_events(mocker, monkeypatch):
     monkeypatch.setenv("KEYWORDS", '{"rh": ["folha de pagamento"]}')
-    mock_tweet = mocker.patch("diario.twitter.tweet")
+    mock_tweet = mocker.patch("diario_bot.twitter.tweet")
     gazettes = [
         {
             "crawled_from": "https://diariooficial.feiradesantana.ba.gov.br",
@@ -51,7 +51,7 @@ def test_thread_creation_when_there_are_events(mocker, monkeypatch):
 
 
 def test_if_tweet_was_posted_on_twitter(mocker):
-    mock_tweepy = mocker.patch("diario.twitter.tweepy")
+    mock_tweepy = mocker.patch("diario_bot.twitter.tweepy")
     tweet("Hi")
 
     assert mock_tweepy.OAuthHandler.called
@@ -60,7 +60,7 @@ def test_if_tweet_was_posted_on_twitter(mocker):
 
 
 def test_when_need_post_multiple_threads(mocker, monkeypatch):
-    mock_tweet = mocker.patch("diario.twitter.tweet")
+    mock_tweet = mocker.patch("diario_bot.twitter.tweet")
     monkeypatch.setenv(
         "KEYWORDS",
         """
@@ -71,7 +71,7 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
         }
         """,
     )
-    monkeypatch.setattr("diario.twitter.CHARACTER_LIMIT", 40)
+    monkeypatch.setattr("diario_bot.twitter.CHARACTER_LIMIT", 40)
 
     gazettes = [
         {
@@ -118,7 +118,7 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
 
 
 def test_date_format_is_correct(mocker):
-    mock_tweet = mocker.patch("diario.twitter.tweet")
+    mock_tweet = mocker.patch("diario_bot.twitter.tweet")
 
     gazettes = [
         {

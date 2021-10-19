@@ -1,7 +1,6 @@
+from apis.maria_quiteria import get_todays_gazette
 from dotenv import load_dotenv
-
-from diario.maria_quiteria import get_todays_gazette
-from diario.twitter import post_todays_gazette
+from twitter import post_todays_gazette
 
 load_dotenv()
 
