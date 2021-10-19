@@ -1,11 +1,10 @@
-import json
 import os
 from datetime import datetime
 
 import tweepy
 from loguru import logger
 
-from diario.keywords import extract_keywords
+from diario.keywords import extract_keywords, read_keywords
 
 CHARACTER_LIMIT = 270
 
@@ -51,7 +50,7 @@ def post_todays_gazette(gazettes: list):
         if tweet_id is None:
             continue
         logger.info("The gazette was posted on twitter!")
-        keywords = json.loads(os.getenv("KEYWORDS", "{}"))
+        keywords = read_keywords()
         if keywords:
             logger.info("Keywords found.")
         events_text = "".join(
