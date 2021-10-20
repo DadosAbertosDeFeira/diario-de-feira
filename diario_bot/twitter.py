@@ -1,15 +1,10 @@
-import json
 import os
-from datetime import date, datetime
+from datetime import datetime
 
-import requests
 import tweepy
-from dotenv import load_dotenv
 from loguru import logger
 
-from diario.meaning import extract_keywords, split_tweets
-
-load_dotenv()
+from diario_bot.keywords import extract_keywords, read_keywords
 
 CHARACTER_LIMIT = 270
 
@@ -27,50 +22,20 @@ def tweet(message: str, tweet_id=None):
         logger.exception(e)
 
 
-def create_maria_quiteria_api_token():
-    url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/token/"
-    data = {
-        "username": f"{os.getenv('MARIA_QUITERIA_USERNAME')}",
-        "password": f"{os.getenv('MARIA_QUITERIA_PASSWORD')}",
-    }
+def split_tweets(found_topics: list, character_limit: int):
+    tweet = []
+    tweet_list = []
+    character_sum = 0
 
-    logger.info("Getting token from Maria Quitéria")
-    token_response = requests.post(url, data=data)
-    token_response.raise_for_status()
+    for word in found_topics:
+        if character_sum + len(word) >= character_limit:
+            tweet_list.append(tweet)
+            tweet = []
+        tweet.append(word)
+        character_sum = sum(len(item) for item in tweet)
 
-    return token_response.json()["access"]
-
-
-def get_todays_gazette():
-    date_today = date.today().strftime("%Y-%m-%d")
-    token_maria_quiteria = create_maria_quiteria_api_token()
-
-    params = {"start_date": date_today}
-    url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {token_maria_quiteria}",
-    }
-
-    try:
-        logger.info("Looking for gazettes")
-        response = requests.get(url, headers=headers, params=params)
-        logger.debug(response)
-        response_json = response.json()
-
-        gazettes = [result for result in response_json["results"]]
-        logger.info(f"Number of gazettes found: {len(gazettes)}")
-    except KeyError as e:
-        logger.exception(e)
-        raise KeyError
-
-    return gazettes
-
-
-def read_keywords():
-    keywords = os.getenv("KEYWORDS") or open("default_keywords.json").read()
-    logger.info(f"Keywords:\n{keywords}")
-    return json.loads(keywords)
+    tweet_list.append(tweet)
+    return tweet_list
 
 
 def post_todays_gazette(gazettes: list):
@@ -85,7 +50,6 @@ def post_todays_gazette(gazettes: list):
         if tweet_id is None:
             continue
         logger.info("The gazette was posted on twitter!")
-
         keywords = read_keywords()
         if keywords:
             logger.info("Keywords found.")
@@ -110,8 +74,3 @@ def post_todays_gazette(gazettes: list):
                 reply_message = f"Nele temos: {', '.join(found_topics)}"
                 tweet(reply_message, tweet_id)
                 logger.info("The thread was posted")
-
-
-if __name__ == "__main__":
-    gazettes = get_todays_gazette()
-    post_todays_gazette(gazettes)
