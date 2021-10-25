@@ -19,6 +19,9 @@ pre-commit = "^2.14.0"
 pytest = "^6.2.4"
 pytest-mock = "^3.6.1"
 
+[tool.poetry.scripts]
+diario_bot = "diario_bot.main:main"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

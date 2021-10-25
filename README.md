@@ -38,8 +38,9 @@ As variáveis de ambiente deverão ser incluídas em um arquivo chamado `.env`. 
 
 ## Rodando o projeto
 
+Dentro do seu ambiente virtual, basta rodar:
 ```
-python diario_bot/main.py
+diario_bot
 ```
 
 ## Executando os testes
