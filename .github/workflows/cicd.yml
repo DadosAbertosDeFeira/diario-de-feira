@@ -18,7 +18,6 @@ jobs:
         poetry --version
         poetry config virtualenvs.create false
         poetry install -vv
-        poetry shell
         cp .env-sample .env
     - name: Test with pytest
       run: pytest -vvv

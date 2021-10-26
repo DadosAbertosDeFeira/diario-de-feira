@@ -20,7 +20,6 @@ jobs:
           poetry --version
           poetry config virtualenvs.create false
           poetry install -vv
-          poetry shell
       - name: Executa script python
         env:
           CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
