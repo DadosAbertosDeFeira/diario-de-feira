@@ -38,7 +38,7 @@ def split_tweets(found_topics: list, character_limit: int):
     return tweet_list
 
 
-def post_todays_gazette(gazettes: list, dry_run=False):
+def post_gazette(gazettes: list, dry_run=False):
     for gazette in gazettes:
         date_br = datetime.strptime(gazette["date"], "%Y-%m-%d").strftime("%d/%m/%y")
         tweet_message = (
@@ -47,12 +47,14 @@ def post_todays_gazette(gazettes: list, dry_run=False):
             f"📰\n{gazette['files'][0]['url']}"
         )
 
-        if dry_run is False:
+        if dry_run:
+            logger.debug(f"tweet: {tweet_message}")
+        else:
             tweet_id = tweet(tweet_message)
             if tweet_id is None:
                 continue
             logger.info("The gazette was posted on twitter!")
-        logger.debug(f"tweet: {tweet_message}")
+
         keywords = read_keywords()
         if keywords:
             logger.info("Keywords found.")
@@ -72,13 +74,15 @@ def post_todays_gazette(gazettes: list, dry_run=False):
                     else:
                         reply_message = f"Temos também: {', '.join(post)}"
 
-                    if dry_run is False:
+                    if dry_run:
+                        logger.debug(f"tweet: {reply_message}")
+                    else:
                         tweet_id = tweet(reply_message, tweet_id)
                         logger.info("The thread was posted")
-                    logger.debug(f"tweet: {reply_message}")
             else:
                 reply_message = f"Nele temos: {', '.join(found_topics)}"
-                if dry_run is False:
+                if dry_run:
+                    logger.debug(f"tweet: {reply_message}")
+                else:
                     tweet(reply_message, tweet_id)
                     logger.info("The thread was posted")
-                logger.debug(f"tweet: {reply_message}")

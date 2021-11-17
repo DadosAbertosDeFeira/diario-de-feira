@@ -19,18 +19,15 @@ def create_api_token():
     return token_response.json()["access"]
 
 
-def get_todays_gazette(gazette_date=None):
+def get_gazette_by_date(gazette_date=None):
     token_maria_quiteria = create_api_token()
-
-    params = {"start_date": date.today().strftime("%Y-%m-%d")}
+    gazette_date = gazette_date or date.today().strftime("%Y-%m-%d")
+    params = params = {"start_date": gazette_date, "end_date": gazette_date}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token_maria_quiteria}",
     }
-
-    if gazette_date:
-        params = {"start_date": gazette_date, "end_date": gazette_date}
 
     try:
         logger.info("Looking for gazettes")

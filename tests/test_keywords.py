@@ -1,5 +1,5 @@
 from diario_bot.keywords import extract_keywords
-from diario_bot.twitter import post_todays_gazette
+from diario_bot.twitter import post_gazette
 
 
 def test_extract_keywords_from_a_text():
@@ -95,7 +95,7 @@ def test_read_default_keywords_from_file(mocker, monkeypatch):
     ]
     expected_tweet = "Nele temos: decretos, aditivos, intimação"
 
-    post_todays_gazette(gazettes)
+    post_gazette(gazettes)
 
     assert mock_tweet.call_count == 2
     assert expected_tweet in mock_tweet.mock_calls[1].args[0]
