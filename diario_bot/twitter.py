@@ -38,7 +38,7 @@ def split_tweets(found_topics: list, character_limit: int):
     return tweet_list
 
 
-def post_gazette(gazettes: list, dry_run=False):
+def post_gazettes(gazettes: list, dry_run=False):
     for gazette in gazettes:
         date_br = datetime.strptime(gazette["date"], "%Y-%m-%d").strftime("%d/%m/%y")
         tweet_message = (

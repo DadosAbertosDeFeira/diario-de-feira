@@ -1,6 +1,6 @@
 from unittest.mock import call
 
-from diario_bot.twitter import post_gazette, split_tweets, tweet
+from diario_bot.twitter import post_gazettes, split_tweets, tweet
 
 
 def test_split_tweets_return_list():
@@ -45,7 +45,7 @@ def test_thread_creation_when_there_are_events(mocker, monkeypatch):
         }
     ]
 
-    post_gazette(gazettes)
+    post_gazettes(gazettes)
     assert mock_tweet.called
     assert "Nele temos: rh" in mock_tweet.mock_calls[1].args[0]
 
@@ -103,7 +103,7 @@ def test_when_need_post_multiple_threads(mocker, monkeypatch):
         }
     ]
 
-    post_gazette(gazettes)
+    post_gazettes(gazettes)
     assert mock_tweet.call_count == 4
     assert (
         "Nele temos: inexigibilidade de licitação" in mock_tweet.mock_calls[1].args[0]
@@ -140,6 +140,6 @@ def test_date_format_is_correct(mocker):
 
     expected_date = "14/08/21"
 
-    post_gazette(gazettes)
+    post_gazettes(gazettes)
 
     assert expected_date in mock_tweet.mock_calls[0].args[0]

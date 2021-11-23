@@ -22,7 +22,7 @@ def create_api_token():
 def get_gazette_by_date(gazette_date=None):
     token_maria_quiteria = create_api_token()
     gazette_date = gazette_date or date.today().strftime("%Y-%m-%d")
-    params = params = {"start_date": gazette_date, "end_date": gazette_date}
+    params = {"start_date": gazette_date, "end_date": gazette_date}
     url = f"{os.getenv('MARIA_QUITERIA_API_HOST')}/gazettes/"
     headers = {
         "Content-Type": "application/json",
