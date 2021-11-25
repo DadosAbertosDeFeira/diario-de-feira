@@ -38,10 +38,22 @@ As variáveis de ambiente deverão ser incluídas em um arquivo chamado `.env`. 
 
 ## Rodando o projeto
 
-Dentro do seu ambiente virtual, basta rodar:
+Para postar diário do dia corrente, entre no seu ambiente virtual e rode:
 ```
 diario_bot
 ```
+
+Caso queira rodar o projeto mas buscando diário de algum dia anterior, só incluir a data no formato YYYY-MM-DD, na hora de rodar o projeto, dessa forma:
+
+```
+diario_bot --data YYYY-MM-DD
+```
+
+Se caso queira rodar o projeto sem postar os tweets, mas mesmo assim conseguir acompanhar os logs, use:
+```
+diario_bot --dry-run
+```
+
 
 ## Executando os testes
 

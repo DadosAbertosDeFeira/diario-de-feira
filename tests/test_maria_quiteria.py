@@ -1,7 +1,7 @@
 import pytest
 from requests import HTTPError
 
-from diario_bot.apis.maria_quiteria import create_api_token, get_todays_gazette
+from diario_bot.apis.maria_quiteria import create_api_token, get_gazette_by_date
 
 
 def test_raise_exception_when_token_is_not_valid(mocker):
@@ -13,7 +13,7 @@ def test_raise_exception_when_token_is_not_valid(mocker):
         create_api_token()
 
 
-def test_if_get_todays_gazette_return_result(mocker):
+def test_if_get_gazette_by_date_return_result(mocker):
     expected_result = {
         "count": 249,
         "next": "...",
@@ -44,7 +44,7 @@ def test_if_get_todays_gazette_return_result(mocker):
     mock_response.return_value.ok = True
     mock_response.return_value.json.return_value = expected_result
 
-    result = get_todays_gazette()
+    result = get_gazette_by_date()
 
     assert mock_response.called
     assert result != []
