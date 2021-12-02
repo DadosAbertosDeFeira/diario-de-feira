@@ -16,6 +16,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry
         poetry --version
+        poetry config experimental.new-installer false
         poetry config virtualenvs.create false
         poetry install -vv
         cp .env-sample .env
