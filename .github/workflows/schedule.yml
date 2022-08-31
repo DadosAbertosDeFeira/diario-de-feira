@@ -16,7 +16,7 @@ jobs:
       - name: Instala dependências
         run: |
           python -m pip install --upgrade pip
-          pip install poetry
+          pip install poetry==1.1.15
           poetry --version
           poetry config experimental.new-installer false
           poetry config virtualenvs.create false
