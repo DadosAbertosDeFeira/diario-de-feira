@@ -1,20 +1,8 @@
-import os
-from logging import WARNING
-
-import sentry_sdk
 from dotenv import load_dotenv
-from loguru import logger
-from sentry_sdk.integrations.logging import EventHandler, LoggingIntegration
 
 from diario_bot.apis.maria_quiteria import get_gazette_by_date
 from diario_bot.cli import cli_args
 from diario_bot.twitter import post_gazettes
-
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    integrations=[LoggingIntegration(level=None, event_level=None)],
-)
-logger.add(EventHandler(level=WARNING))
 
 load_dotenv()
 CLI_ARGS = cli_args()
